@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import TopBar from './TopBar';
+import { API_URL } from '@env';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -19,9 +21,30 @@ const wp = (percent) => width * (percent / 100);
 const hp = (percent) => height * (percent / 100);
 
 const Home = () => {
+  const [categories, setCategories] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [activeIndex2, setActiveIndex2] = useState(0); 
-  const navigation = useNavigation(); 
+  const [activeIndex2, setActiveIndex2] = useState(0);
+  const navigation = useNavigation();
+
+  const fetchLoanCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/HomePageCategory`);
+      const data = await response.json();
+      if (response.ok) {
+        setCategories(data.data);
+      }
+      else {
+        console.error("Failed to fetch..", data);
+      }
+    }
+    catch (error) {
+      console.error("Error Fetching Data", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoanCategories();
+  }, []);
 
   const handleScroll = (event, carouselNumber) => {
     const slide = Math.ceil(
@@ -34,29 +57,12 @@ const Home = () => {
     }
   };
 
+  
+
   return (
     <ScrollView style={styles.container}>
       {/* Top Bar */}
-      {/* <View style={styles.topBar}>
-        <View style={styles.profileContainer}>
-          <TouchableOpacity style={styles.profileButton}>
-            <Image
-              source={{ uri: 'https://via.placeholder.com/150' }}
-              style={styles.profileImage}
-            />
-          </TouchableOpacity>
-          <Text style={styles.userName}>Anmol Mishra</Text>
-        </View>
-        <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.iconButton}>
-            <FontAwesome name="bell" size={24} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <FontAwesome name="heart" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-      </View> */}
-      <TopBar/>
+      <TopBar />
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -114,38 +120,61 @@ const Home = () => {
         </View>
       </View>
 
-      {/* Loan Categories */}
-      <Text style={styles.heading}>Loan Categories</Text>
+   {/* Loan Categories */}
+   
+{/* <Text style={styles.heading}>Loan Categories</Text>
+<View style={styles.categoriesContainer}>
+  
+  {categories.map((category) => {
+    return (
+      <TouchableOpacity key={category.id} style={styles.categoryIconContainer}  >
+       
+        {category.Image && typeof category.Image === 'string' ? (
+          <Image
+            source={{ uri: category.Image }} 
+            style={styles.categoryImage}
+          />
+        ) : (
+          <FontAwesome name="line-chart" size={32} color="Black" /> 
+        )}
+       
+        <Text style={styles.categoryText}>
+          {category.Title ? category.Title : 'No Title'}
+        </Text>
+      </TouchableOpacity>
+    );
+  })}
+</View> */}
 
+   {/* Loan Categories */}
+   <Text style={styles.heading}>Loan Categories</Text>
       <View style={styles.categoriesContainer}>
-        <TouchableOpacity style={styles.categoryIconContainer}>
-          <View style={styles.categoryIcon}>
-            <FontAwesome name="line-chart" size={32} color="white" />
-          </View>
-          <Text style={styles.categoryText}>Investment</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryIconContainer}>
-          <View style={styles.categoryIcon}>
-            <FontAwesome name="shield" size={32} color="white" />
-          </View>
-          <Text style={styles.categoryText}>Insurance</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryIconContainer}>
-          <View style={styles.categoryIcon}>
-            <FontAwesome name="money" size={32} color="white" />
-          </View>
-          <Text style={styles.categoryText}>Loan</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.categoryIconContainer}>
-          <View style={styles.categoryIcon}>
-            <FontAwesome name="credit-card" size={32} color="white" />
-          </View>
-          <Text style={styles.categoryText}>Credit Loan</Text>
-        </TouchableOpacity>
+        {/* Map through categories and render them dynamically */}
+        {categories.map((category) => {
+          return (
+            <TouchableOpacity 
+              key={category.id} 
+              style={styles.categoryIconContainer} 
+              onPress={() => navigation.navigate('SubCategory', { SubCategoryId: category.id })} // Navigate to SubCategory and pass id
+            >
+              {/* Conditionally render image or icon */}
+              {category.Image && typeof category.Image === 'string' ? (
+                <Image
+                  source={{ uri: category.Image }} // Use the image if available
+                  style={styles.categoryImage}
+                />
+              ) : (
+                <FontAwesome name="line-chart" size={32} color="Black" /> // Render icon if image is not available
+              )}
+              {/* Ensure the title is a string and wrapped in a Text component */}
+              <Text style={styles.categoryText}>
+                {category.Title ? category.Title : 'No Title'} {/* Fallback if title is missing */}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
+
 
       {/* Second Carousel */}
       <Text style={styles.heading}>Personal Finance Essentials</Text>
@@ -172,6 +201,7 @@ const Home = () => {
           </View>
         </ScrollView>
       </View>
+      {/* <BottomTabNavigator/> */}
     </ScrollView>
   );
 };
@@ -183,8 +213,6 @@ const styles = StyleSheet.create({
     paddingTop: hp(10),
     backgroundColor: '#f5f5f5',
   },
-  
-
   profileContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -251,7 +279,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: hp(1),
-    
+
   },
   dot: {
     width: wp(2),

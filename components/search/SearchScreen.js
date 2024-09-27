@@ -1,171 +1,85 @@
-// import React, { useState, useEffect } from 'react';
-// import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-// import { FontAwesome } from '@expo/vector-icons'; 
-
-// const SearchScreen = ({ navigation }) => {
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const [notFound, setNotFound] = useState(false);
-//   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
-
-//   const keywords = ['Loan', 'Credit Card', 'Home Loans']; // Suggested keywords
-
-//   // Debouncing effect
-//   useEffect(() => {
-//     const handler = setTimeout(() => {
-//       setDebouncedQuery(searchQuery);
-//     }, 500); // 500ms delay before executing search
-
-//     return () => {
-//       clearTimeout(handler); // Clear timeout if user is still typing
-//     };
-//   }, [searchQuery]); // Runs whenever searchQuery changes
-
-//   // Filter keywords based on search query
-//   const filteredKeywords = keywords.filter(keyword => 
-//     keyword.toLowerCase().includes(debouncedQuery.toLowerCase())
-//   );
-
-//   // Check if no matches are found
-//   useEffect(() => {
-//     if (debouncedQuery && filteredKeywords.length === 0) {
-//       setNotFound(true);
-//     } else {
-//       setNotFound(false);
-//     }
-//   }, [debouncedQuery, filteredKeywords]);
-
-//   return (
-//     <View style={styles.container}>
-//       {/* Search Bar */}
-//       <View style={styles.searchContainer}>
-//         <FontAwesome name="search" size={20} color="gray" style={styles.searchIcon} />
-//         <TextInput 
-//           style={styles.searchInput}
-//           placeholder="Type your search query here..."
-//           value={searchQuery}
-//           onChangeText={setSearchQuery} // Update search query state
-//         />
-//       </View>
-
-//       {/* OOPs Not Found Message */}
-//       {notFound && (
-//         <Text style={styles.notFoundText}>OOPs Not Found</Text>
-//       )}
-
-//       {/* Suggested Keywords */}
-//       <View style={styles.suggestionsContainer}>
-//         <Text style={styles.suggestionsHeading}>Suggested Keywords:</Text>
-//         <View style={styles.suggestions}>
-//           {filteredKeywords.map((keyword, index) => (
-//             <TouchableOpacity key={index} style={styles.suggestionButton}>
-//               <Text style={styles.suggestionText}>{keyword}</Text>
-//             </TouchableOpacity>
-//           ))}
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     paddingHorizontal: '5%',
-//     justifyContent: 'center', 
-//   },
-//   searchContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     borderColor: '#4C4DDC',
-//     borderWidth: 1,
-//     borderRadius: 20, 
-//     paddingVertical: '2%',
-//     paddingHorizontal: '3%',
-//     marginBottom: '8%',
-//   },
-//   searchInput: {
-//     flex: 1,
-//     height: 40, 
-//     paddingHorizontal: '2%',
-//   },
-//   searchIcon: {
-//     marginHorizontal: '2%',
-//   },
-//   notFoundText: {
-//     color: 'red',
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//     marginBottom: '4%',
-//   },
-//   suggestionsContainer: {
-//     marginTop: '4%',
-//   },
-//   suggestionsHeading: {
-//     fontSize: 16,
-//     marginBottom: '2%',
-//     fontWeight: 'bold',
-//   },
-//   suggestions: {
-//     flexDirection: 'row',
-//     flexWrap: 'wrap',
-//   },
-//   suggestionButton: {
-//     backgroundColor: '#fff', 
-//     borderColor: '#4C4DDC', 
-//     borderWidth: 1,
-//     borderRadius: 8,
-//     padding: '2%',
-//     marginRight: '2%',
-//     marginBottom: '2%',
-//   },
-//   suggestionText: {
-//     fontSize: 14,
-//   },
-// });
-
-// export default SearchScreen;
-
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons'; 
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  FlatList,
+  Alert,
+} from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { API_URL } from '@env';
 
 const SearchScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [notFound, setNotFound] = useState(false);
-  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
 
-  const keywords = ['Loan', 'Credit Card', 'Home Loans']; // Suggested keywords
+  // Fetch categories from the API
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/Category`);
+      const data = await response.json();
+      if (data.status === 'true') {
+        setCategories(data.data);
+      } else {
+        Alert.alert('Error', 'Failed to fetch categories');
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      Alert.alert('Error', 'Failed to fetch categories');
+    }
+  };
 
-  // Debouncing effect
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 500); // 500ms delay before executing search
+    fetchCategories(); // Fetch categories on mount
+  }, []);
 
-    return () => {
-      clearTimeout(handler); // Clear timeout if user is still typing
-    };
-  }, [searchQuery]); // Runs whenever searchQuery changes
-
-  // Filter keywords based on search query
-  const filteredKeywords = keywords.filter(keyword => 
-    keyword.toLowerCase().includes(debouncedQuery.toLowerCase())
-  );
-
-  // Check if no matches are found
+  // Filter categories based on search query
   useEffect(() => {
-    if (debouncedQuery && filteredKeywords.length === 0) {
+    const filtered = categories.filter((category) =>
+      category.Title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+
+    if (searchQuery && filtered.length === 0) {
       setNotFound(true);
     } else {
       setNotFound(false);
     }
-  }, [debouncedQuery, filteredKeywords]);
+  }, [searchQuery, categories]);
 
-  // Handle keyword click, set the search query and navigate to ProductPage
-  const handleKeywordClick = (keyword) => {
-    setSearchQuery(keyword); // Set the clicked keyword in the search bar
-    navigation.navigate('ProductPage', { keyword }); // Pass keyword to ProductPage
+  // Handle keyword selection and post ID to fetch subcategories
+  const handleKeywordClick = async (category) => {
+    setSearchQuery(category.Title); // Set selected keyword in the search bar
+    try {
+      const response = await fetch(`${API_URL}/SubCategory`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ CategoryId: category.id }), // Send selected category ID
+      });
+      const data = await response.json();
+      if (response.ok && data.status === 'true') {
+        setSubCategories(data.data); // Set the subcategories
+      } else {
+        Alert.alert('Error', 'Failed to fetch subcategories');
+      }
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+      Alert.alert('Error', 'Failed to fetch subcategories');
+    }
+  };
+
+  // Handle subcategory click to navigate to ProductPage
+  const handleSubCategoryClick = (subCategory) => {
+    // Assuming you'll pass the subcategory data to the ProductPage
+    // console.log("Subcategory - ",subCategory.id);
+    navigation.navigate('ProductPage', { SubCategoryId: subCategory.id });
   };
 
   return (
@@ -173,7 +87,7 @@ const SearchScreen = ({ navigation }) => {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <FontAwesome name="search" size={20} color="gray" style={styles.searchIcon} />
-        <TextInput 
+        <TextInput
           style={styles.searchInput}
           placeholder="Type your search query here..."
           value={searchQuery}
@@ -182,24 +96,48 @@ const SearchScreen = ({ navigation }) => {
       </View>
 
       {/* OOPs Not Found Message */}
-      {notFound && (
-        <Text style={styles.notFoundText}>OOPs Not Found</Text>
-      )}
+      {notFound && <Text style={styles.notFoundText}>OOPs Not Found</Text>}
 
-      {/* Suggested Keywords */}
+      {/* Suggested Categories */}
       <View style={styles.suggestionsContainer}>
-        <Text style={styles.suggestionsHeading}>Suggested Keywords:</Text>
-        <View style={styles.suggestions}>
-          {filteredKeywords.map((keyword, index) => (
-            <TouchableOpacity 
-              key={index} 
+        <Text style={styles.suggestionsHeading}>Suggested Categories:</Text>
+        <FlatList
+          data={filteredCategories}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
               style={styles.suggestionButton}
-              onPress={() => handleKeywordClick(keyword)} // Handle keyword click
+              onPress={() => handleKeywordClick(item)} // Handle category click
             >
-              <Text style={styles.suggestionText}>{keyword}</Text>
+              <Text style={styles.suggestionText}>{item.Title}</Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          )}
+          numColumns={3} // Display 3 categories per row
+        />
+      </View>
+
+      {/* SubCategories View */}
+      <View style={styles.subCategoriesContainer}>
+        <Text style={styles.subCategoriesHeading}>SubCategories:</Text>
+        {subCategories.length > 0 ? (
+          <FlatList
+            data={subCategories}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.subCategoryButton}
+                onPress={() => handleSubCategoryClick(item)} // Navigate to ProductPage
+              >
+                <Text style={styles.subCategoryText}>{item.Title}</Text>
+              </TouchableOpacity>
+            )}
+            numColumns={3} // Display 3 subcategories per row
+          />
+        ) : (
+          <Text style={styles.noSubCategoryText}>
+            Select a category to view subcategories.
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -209,21 +147,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: '5%',
-    justifyContent: 'center', 
+    backgroundColor: '#f9f9f9', // Optional: a light background color for better contrast
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderColor: '#4C4DDC',
     borderWidth: 1,
-    borderRadius: 20, 
+    borderRadius: 20,
     paddingVertical: '2%',
     paddingHorizontal: '3%',
-    marginBottom: '8%',
+    marginTop: '25%',
   },
   searchInput: {
     flex: 1,
-    height: 40, 
+    height: 60,
     paddingHorizontal: '2%',
   },
   searchIcon: {
@@ -237,28 +175,56 @@ const styles = StyleSheet.create({
     marginBottom: '4%',
   },
   suggestionsContainer: {
-    marginTop: '4%',
+    marginBottom: '4%',
+    marginTop: '2%',
   },
   suggestionsHeading: {
     fontSize: 16,
-    marginBottom: '2%',
+    marginTop: '2%',
     fontWeight: 'bold',
   },
-  suggestions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
   suggestionButton: {
-    backgroundColor: '#fff', 
-    borderColor: '#4C4DDC', 
+    backgroundColor: '#fff',
+    borderColor: '#4C4DDC',
     borderWidth: 1,
     borderRadius: 8,
-    padding: '2%',
+    padding: '4%',
     marginRight: '2%',
     marginBottom: '2%',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   suggestionText: {
     fontSize: 14,
+    textAlign: 'center',
+  },
+  subCategoriesContainer: {
+    marginTop: '5%',
+  },
+  subCategoriesHeading: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  subCategoryButton: {
+    backgroundColor: '#fff',
+    borderColor: '#4C4DDC',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: '4%',
+    marginRight: '2%',
+    marginBottom: '2%',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  subCategoryText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  noSubCategoryText: {
+    color: '#666',
+    marginTop: 10,
   },
 });
 

@@ -6,6 +6,8 @@ import SignUp from './SignUp'; // Adjust paths as needed
 import ForgotPassword from './ForgotPassword';
 import OtpVerification from './OtpVerification';
 import ResetPassword from './ResetPassword';
+import ForgetOtpVerify from './ForgetOtpVerify';
+
 const Stack = createStackNavigator();
 
 const AuthStack = () => {
@@ -16,6 +18,7 @@ const AuthStack = () => {
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
       <Stack.Screen name="OtpVerification" component={OtpVerification} options={{ headerShown: false }} />
       <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ headerShown: false }} />
+      <Stack.Screen name="ForgetOtpVerify" component={ForgetOtpVerify} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };

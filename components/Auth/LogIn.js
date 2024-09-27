@@ -1,104 +1,178 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import logo from '../../assets/SampleLogo.png'; // Replace with your logo path
 import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for eye icon
+import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; // Import Paper components
+import { API_URL } from '@env'; // Import the API URL from .env file
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const LogIn = ({ navigation }) => {
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
+  const [dialogTitle, setDialogTitle] = useState('');
 
-  const handleLogin = () => {
-    // Add your login logic here
+  // Show Dialog
+  const showDialog = (title, message) => {
+    setDialogTitle(title);
+    setDialogMessage(message);
+    setDialogVisible(true);
   };
- 
-  const handleForgotNavigation =()=>{
+
+  // Hide Dialog
+  const hideDialog = () => setDialogVisible(false);
+
+  // Handle login
+  const handleLogin = async () => {
+    if (!phoneNumber || !password) {
+      showDialog('Validation Error', 'Please enter both phone number and password.');
+      return;
+    }
+
+    setLoading(true);
+
+    const data = {
+      PhoneNumber: phoneNumber,
+      Password: password,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log('respoinse -', result);
+      setLoading(false);
+
+      if (response.ok && result.status === 'true') {
+        // Save token in AsyncStorage
+        await AsyncStorage.setItem('userToken', result.token);
+
+        showDialog('Success', 'Login successful!');
+
+        setTimeout(() => {
+          hideDialog();
+          navigation.navigate('BottomTabNavigator'); // Navigate to HomeScreen after successful login
+        }, 1000);
+      } else {
+        showDialog('Error', result.message || 'Login failed. Please check your credentials.');
+        // Reset form fields on error
+        setPhoneNumber('');
+        setPassword('');
+      }
+    } catch (error) {
+      setLoading(false);
+      showDialog('Error', 'Failed to login. Please try again later.');
+      // Reset form fields on error
+      setPhoneNumber('');
+      setPassword('');
+    }
+  };
+
+  // Navigation handlers
+  const handleForgotNavigation = () => {
     navigation.navigate('ForgotPassword');
-  }
+  };
 
   const handleSignUpNavigation = () => {
-    navigation.navigate('SignUp'); // Navigate to the SignUp screen
+    navigation.navigate('SignUp');
   };
 
   return (
-    <View style={styles.container}>
-      {/* Logo */}
-      <Image source={logo} style={styles.logo} />
+    <PaperProvider>
+      <View style={styles.container}>
+        {/* Logo */}
+        <Image source={logo} style={styles.logo} />
 
-      {/* Welcome Text */}
-      <Text style={styles.welcomeText}>Nice to see you again</Text>
+        {/* Welcome Text */}
+        <Text style={styles.welcomeText}>Nice to see you again</Text>
 
-      {/* Login Form */}
-      <View style={styles.formContainer}>
-        {/* Email Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput 
-            style={styles.input} 
-            placeholder="Email"
-            keyboardType="email-address" 
-          />
-        </View>
-
-        {/* Password Input */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput 
-              style={styles.passwordInput} 
-              placeholder="Password" 
-              secureTextEntry={!showPassword} 
+        {/* Login Form */}
+        <View style={styles.formContainer}>
+          {/* Phone Number Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
             />
-            <TouchableOpacity 
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Icon 
-                name={showPassword ? 'eye-off' : 'eye'} 
-                size={wp('5%')} 
-                color="black" 
+          </View>
+
+          {/* Password Input */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
               />
+              <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+                <Icon name={showPassword ? 'eye-off' : 'eye'} size={wp('5%')} color="black" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Forgot Password Link */}
+          <TouchableOpacity onPress={handleForgotNavigation} style={styles.forgotPasswordContainer}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {/* Login Button */}
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>Log In</Text>}
+          </TouchableOpacity>
+
+          {/* Divider Line */}
+          <View style={styles.dividerLine}></View>
+
+          {/* Sign in with Google Button */}
+          <TouchableOpacity style={styles.googleButton}>
+            <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          </TouchableOpacity>
+
+          {/* Sign Up Link */}
+          <View style={styles.signUpContainer}>
+            <Text style={styles.signUpText}>Don't have an account?</Text>
+            <TouchableOpacity onPress={handleSignUpNavigation}>
+              <Text style={styles.signUpLink}> Sign Up now</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Forgot Password Link */}
-        {/* <TouchableOpacity onPress={handleForgotNavigation}>
-        <View style={styles.forgotPasswordContainer}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </View>
-        </TouchableOpacity> */}
-        <TouchableOpacity onPress={handleForgotNavigation} style={styles.forgotPasswordContainer}>
-          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-        </TouchableOpacity>
-        
-
-        {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Log In</Text>
-        </TouchableOpacity>
-
-        {/* Divider Line */}
-        <View style={styles.dividerLine}></View>
-
-        {/* Sign in with Google Button */}
-        <TouchableOpacity style={styles.googleButton}>
-          <Text style={styles.googleButtonText}>Sign in with Google</Text>
-        </TouchableOpacity>
-
-        {/* Sign Up Link */}
-        <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={handleSignUpNavigation}>
-            <Text style={styles.signUpLink}> Sign Up now</Text>
-          </TouchableOpacity>
-        </View>
-
+        {/* Dialog for alerts */}
+        <Portal>
+          <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+            <Dialog.Title>{dialogTitle}</Dialog.Title>
+            <Dialog.Content>
+              <PaperText>{dialogMessage}</PaperText>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={hideDialog}>OK</Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
       </View>
-    </View>
+    </PaperProvider>
   );
 };
 
 const styles = StyleSheet.create({
+  // Styles remain the same
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -150,7 +224,7 @@ const styles = StyleSheet.create({
   passwordInput: {
     flex: 1,
     padding: wp('4%'),
-    borderWidth: 0, // Border handled by passwordContainer
+    borderWidth: 0,
     borderColor: 'transparent',
   },
   eyeIcon: {
@@ -162,7 +236,7 @@ const styles = StyleSheet.create({
     marginBottom: hp('2%'),
   },
   forgotPasswordText: {
-    color: "#007AFF",
+    color: '#007AFF',
     fontSize: wp('4%'),
   },
   loginButton: {

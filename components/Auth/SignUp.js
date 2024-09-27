@@ -1,117 +1,200 @@
-
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import logo from '../../assets/SampleLogo.png'; // Replace with your logo path
-import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for eye icon
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import logo from '../../assets/SampleLogo.png'; 
+import Icon from 'react-native-vector-icons/Ionicons'; 
+import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; 
+import { API_URL } from '@env';
 
 const SignUp = ({ navigation }) => {
+    const [fullName, setFullName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false); 
+    const [dialogVisible, setDialogVisible] = useState(false); 
+    const [dialogMessage, setDialogMessage] = useState(''); 
+    const [dialogTitle, setDialogTitle] = useState(''); 
 
-    const handleLogin = () => {
-        // Add your login logic here
+    const validateForm = () => {
+        if (!fullName) {
+            showDialog('Validation Error', 'Please enter your full name.', true);
+            return false;
+        }
+        if (!phoneNumber || phoneNumber.length !== 10) {
+            showDialog('Validation Error', 'Phone number must be 10 digits.', true);
+            return false;
+        }
+        if (!password || password !== confirmPassword) {
+            showDialog('Validation Error', 'Passwords do not match.', true);
+            return false;
+        }
+        return true;
     };
-  
-    const handleSignUpNavigation = () => {
-        navigation.navigate('LogIn'); // Navigate to the SignUp screen
-      };
+
+    const showDialog = (title, message, resetForm = false) => {
+        setDialogTitle(title);
+        setDialogMessage(message);
+        setDialogVisible(true);
+
+        if (resetForm) {
+            setFullName('');
+            setPhoneNumber('');
+            setPassword('');
+            setConfirmPassword('');
+        }
+    };
+
+    const hideDialog = () => setDialogVisible(false);
+
+    const handleSignUp = async () => {
+        if (!validateForm()) return;
+
+        setLoading(true); 
+
+        const data = {
+            FullName: fullName,
+            PhoneNumber: phoneNumber,
+            Password: password,
+            ConfirmPassword: confirmPassword
+        };
+
+        try {
+            const response = await fetch(`${API_URL}/registration`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            setLoading(false); 
+
+            if (response.ok && result.status === "true") {
+                await AsyncStorage.setItem('userToken', result.token);
+                showDialog('Success', result.message);
+
+                setTimeout(() => {
+                    hideDialog();
+                    // navigation.navigate('OtpVerification');
+                    navigation.navigate('OtpVerification', { phoneNumber });
+                }, 2000);
+            } else {
+                showDialog('Error', result.message || 'Something went wrong.', true);
+            }
+        } catch (error) {
+            setLoading(false); 
+            showDialog('Error', 'Failed to register. Please try again later.', true);
+        }
+    };
 
     return (
-        <View style={styles.container}>
-            {/* Logo */}
-            <Image source={logo} style={styles.logo} />
+        <PaperProvider>
+            <View style={styles.container}>
+                <Image source={logo} style={styles.logo} />
 
-            {/* Welcome Text */}
-            <Text style={styles.welcomeText}>Create Your Account</Text>
+                <Text style={styles.welcomeText}>Create Your Account</Text>
 
-            {/* Login Form */}
-            <View style={styles.formContainer}>
-                {/* Email Input */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Name</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Full Name"
-                        keyboardType="Name"
-                    />
-                </View>
-
-                {/* Phone Number */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Phone Number"
-                        keyboardType="number"
-                    />
-                </View>
-
-                {/* Password Input */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}> Create Password</Text>
-                    <View style={styles.passwordContainer}>
+                <View style={styles.formContainer}>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Name</Text>
                         <TextInput
-                            style={styles.passwordInput}
-                            placeholder="Password"
-                            secureTextEntry={!showPassword}
+                            style={styles.input}
+                            placeholder="Full Name"
+                            value={fullName}
+                            onChangeText={setFullName}
                         />
-                        <TouchableOpacity
-                            style={styles.eyeIcon}
-                            onPress={() => setShowPassword(!showPassword)}
-                        >
-                            <Icon
-                                name={showPassword ? 'eye-off' : 'eye'}
-                                size={wp('5%')}
-                                color="black"
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Phone Number</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Phone Number"
+                            keyboardType="numeric"
+                            value={phoneNumber}
+                            onChangeText={setPhoneNumber}
+                            maxLength={10}
+                        />
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Create Password</Text>
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                style={styles.passwordInput}
+                                placeholder="Password"
+                                secureTextEntry={!showPassword}
+                                value={password}
+                                onChangeText={setPassword}
                             />
+                            <TouchableOpacity
+                                style={styles.eyeIcon}
+                                onPress={() => setShowPassword(!showPassword)}
+                            >
+                                <Icon
+                                    name={showPassword ? 'eye-off' : 'eye'}
+                                    size={wp('5%')}
+                                    color="black"
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Confirm Password</Text>
+                        <View style={styles.passwordContainer}>
+                            <TextInput
+                                style={styles.passwordInput}
+                                placeholder="Confirm Password"
+                                secureTextEntry={!showPassword}
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.agreementContainer}>
+                        <Icon name="checkmark-circle" size={wp('5%')} color="green" style={styles.tickIcon} />
+                        <Text style={styles.agreementText}>
+                            Hereby, I agree to the Terms & Conditions and Privacy Policy
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity style={styles.loginButton} onPress={handleSignUp} disabled={loading}>
+                        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginButtonText}>Register</Text>}
+                    </TouchableOpacity>
+
+                    <View style={styles.signUpContainer}>
+                        <Text style={styles.signUpText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('LogIn')}>
+                            <Text style={styles.signUpLink}>Log In</Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* Dialog for alerts */}
+                    <Portal>
+                        <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+                            <Dialog.Title>{dialogTitle}</Dialog.Title>
+                            <Dialog.Content>
+                                <PaperText>{dialogMessage}</PaperText>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={hideDialog}>OK</Button>
+                            </Dialog.Actions>
+                        </Dialog>
+                    </Portal>
                 </View>
-
-                {/* Password Input */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}> Confirm Password</Text>
-                    <View style={styles.passwordContainer}>
-                        <TextInput
-                            style={styles.passwordInput}
-                            placeholder="Enter Password"
-                            secureTextEntry={!showPassword}
-                        />
-                    </View>
-                </View>
-
-                {/* Forgot Password Link */}
-                <View style={styles.agreementContainer}>
-                    <Icon name="checkmark-circle" size={wp('5%')} color="green" style={styles.tickIcon} />
-                    <Text style={styles.agreementText}>
-                        Hereby, I agree to the Terms & Conditions and Privacy Policy
-                    </Text>
-                </View>
-
-                {/* Login Button */}
-                <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-                    <Text style={styles.loginButtonText}>Register</Text>
-                </TouchableOpacity>
-
-                {/* Divider Line */}
-                <View style={styles.dividerLine}></View>
-
-
-
-                {/* Sign Up Link */}
-                <View style={styles.signUpContainer}>
-                    <Text style={styles.signUpText}>Already have an account? </Text>
-                    <TouchableOpacity onPress={handleSignUpNavigation}>
-                        <Text style={styles.signUpLink}> Log In</Text>
-                    </TouchableOpacity>
-                </View>
-
             </View>
-        </View>
+        </PaperProvider>
     );
 };
 
 const styles = StyleSheet.create({
+    // Styles remain the same
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -163,21 +246,9 @@ const styles = StyleSheet.create({
     passwordInput: {
         flex: 1,
         padding: wp('3%'),
-        borderWidth: 0, // Border handled by passwordContainer
-        borderColor: 'transparent',
-        // borderRadius: wp('5%'),
     },
     eyeIcon: {
         paddingHorizontal: wp('2%'),
-    },
-    forgotPasswordContainer: {
-        width: '100%',
-        alignItems: 'flex-end',
-        marginBottom: hp('2%'),
-    },
-    forgotPasswordText: {
-        color: "#007AFF",
-        fontSize: wp('4%'),
     },
     loginButton: {
         width: '100%',
@@ -192,24 +263,17 @@ const styles = StyleSheet.create({
         fontSize: wp('5%'),
         fontWeight: 'bold',
     },
-    dividerLine: {
-        width: '100%',
-        height: 1,
-        backgroundColor: '#ccc',
-        marginVertical: hp('2%'),
-    },
-    googleButton: {
-        width: '100%',
-        padding: wp('4%'),
-        backgroundColor: '#DB4437',
-        borderRadius: wp('2%'),
+    agreementContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
         marginBottom: hp('2%'),
     },
-    googleButtonText: {
-        color: '#fff',
-        fontSize: wp('5%'),
-        fontWeight: 'bold',
+    tickIcon: {
+        marginRight: wp('2%'),
+    },
+    agreementText: {
+        fontSize: wp('4%'),
+        color: 'black',
     },
     signUpContainer: {
         flexDirection: 'row',
@@ -224,18 +288,6 @@ const styles = StyleSheet.create({
         color: '#007AFF',
         fontWeight: 'bold',
     },
-    agreementContainer: {
-    flexDirection: 'row', // Arrange the icon and text in a row
-    alignItems: 'center', // Center them vertically
-    marginBottom: hp('2%'), // Optional: Add some margin at the bottom if needed
-  },
-  tickIcon: {
-    marginRight: wp('2%'), 
-  },
-  agreementText: {
-    fontSize: wp('4%'),
-    color: 'black',
-  },
 });
 
 export default SignUp;
