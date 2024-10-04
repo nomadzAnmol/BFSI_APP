@@ -61,7 +61,8 @@ const LogIn = ({ navigation }) => {
 
         setTimeout(() => {
           hideDialog();
-          navigation.navigate('BottomTabNavigator'); // Navigate to HomeScreen after successful login
+         // navigation.navigate('BottomTabNavigator'); // Navigate to HomeScreen after successful login
+         navigation.navigate('BottomTabNavigator'); 
         }, 1000);
       } else {
         showDialog('Error', result.message || 'Login failed. Please check your credentials.');
