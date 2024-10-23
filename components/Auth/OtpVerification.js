@@ -137,7 +137,7 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityInd
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; 
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import logo from '../../assets/SampleLogo.png'; // Replace with your logo path
+import logo from '../../assets/LogoGoCap1.png';  // Replace with your logo path
 import { API_URL } from '@env';
 
 const OtpVerification = ({ route, navigation }) => {
@@ -268,7 +268,8 @@ const handleOtpSubmit = async () => {
     <PaperProvider>
       <View style={styles.container}>
         {/* Logo */}
-        <Image source={logo} style={styles.logo} />
+        <Image source={logo} style={styles.logo} resizeMode="contain" />
+
 
         {/* OTP Verification Text */}
         <Text style={styles.welcomeText}>OTP Verification</Text>

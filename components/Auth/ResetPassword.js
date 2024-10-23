@@ -313,7 +313,7 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; // Import Paper components
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import logo from '../../assets/SampleLogo.png'; // Replace with your logo path
+import logo from '../../assets/LogoGoCap1.png';  // Replace with your logo path
 import { API_URL } from '@env'; // Import API URL from .env file
 
 const ResetPassword = () => {
@@ -386,7 +386,8 @@ const ResetPassword = () => {
     <PaperProvider>
       <View style={styles.container}>
         {/* Logo */}
-        <Image source={logo} style={styles.logo} />
+        <Image source={logo} style={styles.logo} resizeMode="contain" />
+
 
         {/* Welcome Text */}
         <Text style={styles.welcomeText}>Reset Password</Text>

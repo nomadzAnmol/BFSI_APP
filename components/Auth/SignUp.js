@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
-import logo from '../../assets/SampleLogo.png'; 
+import logo from '../../assets/LogoGoCap1.png';  
 import Icon from 'react-native-vector-icons/Ionicons'; 
 import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; 
 import { API_URL } from '@env';
@@ -94,7 +94,7 @@ const SignUp = ({ navigation }) => {
     return (
         <PaperProvider>
             <View style={styles.container}>
-                <Image source={logo} style={styles.logo} />
+            <Image source={logo} style={styles.logo} resizeMode="contain" />
 
                 <Text style={styles.welcomeText}>Create Your Account</Text>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import logo from '../../assets/SampleLogo.png'; // Replace with your logo path
+import logo from '../../assets/LogoGoCap1.png'; // Replace with your logo path
 import Icon from 'react-native-vector-icons/Ionicons'; // Import Ionicons for eye icon
 import { Button, Dialog, Portal, PaperProvider, Text as PaperText } from 'react-native-paper'; // Import Paper components
 import { API_URL } from '@env'; // Import the API URL from .env file
@@ -153,7 +153,8 @@ const LogIn = ({ navigation }) => {
     <PaperProvider>
       <View style={styles.container}>
         {/* Logo */}
-        <Image source={logo} style={styles.logo} />
+        {/* <Image source={logo} style={styles.logo} /> */}
+        <Image source={logo} style={styles.logo} resizeMode="contain" />
 
         {/* Welcome Text */}
         <Text style={styles.welcomeText}>Nice to see you again</Text>
@@ -203,9 +204,9 @@ const LogIn = ({ navigation }) => {
           <View style={styles.dividerLine}></View>
 
           {/* Sign in with Google Button */}
-          <TouchableOpacity style={styles.googleButton}>
+          {/* <TouchableOpacity style={styles.googleButton}>
             <Text style={styles.googleButtonText}>Sign in with Google</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Sign Up Link */}
           <View style={styles.signUpContainer}>
@@ -244,9 +245,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   logo: {
-    width: wp('40%'),
-    height: wp('20%'),
-    marginBottom: hp('5%'),
+    width: wp('60%'),
+    height: wp('15%'),
+    marginTop: hp('3%'),
   },
   welcomeText: {
     fontSize: wp('7%'),

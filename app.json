@@ -4,7 +4,7 @@
     "slug": "bfsi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icons8.png",
+    "icon": "./assets/LogoGoCap1.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splassh.jpg",
@@ -22,7 +22,7 @@
       "package": "com.anmol6568.bfsi"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/LogoGoCap.svg"
     },
     "extra": {
       "eas": {
