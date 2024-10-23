@@ -58,9 +58,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageContainer: {
-    flex: 1,
-    justifyContent: 'center',
+   flex: 1,
+    justifyContent: 'flex-start',  // Changed from 'center' to 'flex-start'
     alignItems: 'center',
+    marginTop: hp('15%'), 
   },
   image: {
     width: wp('90%'),

@@ -1,113 +1,94 @@
-// import React from 'react';
-// import { StatusBar } from 'expo-status-bar';
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import { FontAwesome } from '@expo/vector-icons';
-// import HomeStack from './NavigationStack';
-// import Profile from './components/LowerNav/Profile';
-// import Info from './components/LowerNav/Info';
-// import Article from './components/LowerNav/Article';
 
-// const Tab = createBottomTabNavigator();
+// import React, { useEffect, useState } from 'react';
+// import { View, ActivityIndicator } from 'react-native';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import NavigationStack from './NavigationStack'; // Your main navigation stack
 
-// export default function App() {
-//   return (
-//     <NavigationContainer>
-//       <Tab.Navigator
-//         screenOptions={({ route }) => ({
-//           tabBarIcon: ({ color, size }) => {
-//             let iconName;
+// const App = () => {
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [initialRoute, setInitialRoute] = useState('OnboardingStack');
 
-//             if (route.name === 'Home') {
-//               iconName = 'home';
-//             } else if (route.name === 'Profile') {
-//               iconName = 'user';
-//             } else if (route.name === 'Info') {
-//               iconName = 'info-circle';
-//             } else if (route.name === 'Article') {
-//               iconName = 'file-text';
-//             }
+//   useEffect(() => {
+//     const checkAuthStatus = async () => {
+//       const token = await AsyncStorage.getItem('userToken');
+//       const hasCompletedOnboarding = await AsyncStorage.getItem('hasCompletedOnboarding');
 
-//             return <FontAwesome name={iconName} size={size} color={color} />;
-//           },
-//           tabBarActiveTintColor: '#9BC4FF',
-//           tabBarInactiveTintColor: '#98A3B3',
-//           headerShown: false,  // Hide the header for all screens
-//         })}
-//       >
-//         <Tab.Screen name="Home" component={HomeStack} />
-//         <Tab.Screen name="Profile" component={Profile} />
-//         <Tab.Screen name="Info" component={Info} />
-//         <Tab.Screen name="Article" component={Article} />
-//       </Tab.Navigator>
-//       <StatusBar style="auto" />
-//     </NavigationContainer>
-//   );
-// }
+//       console.log('Token:', token);  // Log token
+//       console.log('Onboarding Flag:', hasCompletedOnboarding);  // Log onboarding flag
 
+//       if (token) {
+//         // User is logged in
+//         setInitialRoute('MainStack');
+//       } else if (hasCompletedOnboarding === 'true') {
+//         // User has completed onboarding but is not logged in
+//         setInitialRoute('AuthStack');
+//       }
 
-// App.js
-// import React from 'react';
-// import { StatusBar } from 'expo-status-bar';
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import { FontAwesome } from '@expo/vector-icons';
-// import HomeStack from './NavigationStack';
-// import Profile from './components/LowerNav/Profile';
-// import Info from './components/LowerNav/Info';
-// import Article from './components/LowerNav/Article';
-// import BottomTabBar from '@react-navigation/bottom-tabs';
-// const Tab = createBottomTabNavigator();
+//       setIsLoading(false);
+//     };
 
-// export default function App() {
-//   return (
-//     <NavigationContainer>
-//       <Tab.Navigator
-//         screenOptions={({ route }) => ({
-//           tabBarIcon: ({ color, size }) => {
-//             let iconName;
+//     checkAuthStatus();
+//   }, []);
 
-//             if (route.name === 'Home') {
-//               iconName = 'home';
-//             } else if (route.name === 'Profile') {
-//               iconName = 'user';
-//             } else if (route.name === 'Info') {
-//               iconName = 'info-circle';
-//             } else if (route.name === 'Article') {
-//               iconName = 'file-text';
-//             }
+//   if (isLoading) {
+//     return <ActivityIndicator size="large" color="#0000ff" />; // Loading indicator
+//   }
 
-//             return <FontAwesome name={iconName} size={size} color={color} />;
-//           },
-//           tabBarActiveTintColor: '#9BC4FF',
-//           tabBarInactiveTintColor: '#98A3B3',
-//           headerShown: false,  // Hide the header for all screens
-//         })}
-//       >
-//         <Tab.Screen name="Home" component={HomeStack} />
-//         <Tab.Screen name="Profile" component={Profile} />
-//         <Tab.Screen name="Info" component={Info} />
-//         <Tab.Screen name="Article" component={Article} />
-//       </Tab.Navigator>
-//       <StatusBar style="auto" />
-//     </NavigationContainer>
-//   );
-// }
+//   // Pass the computed initialRoute to NavigationStack
+//   return <NavigationStack initialRoute={initialRoute} />;
+// };
 
+// export default App;
 
-// App.js
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import NavigationStack from './NavigationStack'; // Root navigation stack
+import React, { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SplashScreen from 'expo-splash-screen';
+import NavigationStack from './NavigationStack'; // Your main navigation stack
 
-export default function App() {
-  return (
-    <NavigationContainer>
-      <NavigationStack />
-    </NavigationContainer>
-  );
-}
+// Prevent the splash screen from hiding automatically
+SplashScreen.preventAutoHideAsync();
 
+const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState('OnboardingStack');
 
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem('userToken');
+        const hasCompletedOnboarding = await AsyncStorage.getItem('hasCompletedOnboarding');
 
+        console.log('Token:', token);  // Log token
+        console.log('Onboarding Flag:', hasCompletedOnboarding);  // Log onboarding flag
 
+        if (token) {
+          setInitialRoute('MainStack'); // User is logged in
+        } else if (hasCompletedOnboarding === 'true') {
+          setInitialRoute('AuthStack'); // User has completed onboarding but is not logged in
+        }
+
+        // Simulate a 1-second delay before hiding the splash screen
+        setTimeout(() => {
+          setIsLoading(false);  // Done loading, change state
+          SplashScreen.hideAsync();  // Hide the splash screen
+        }, 1000); // 1 second delay
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+        setIsLoading(false);  // Fail safe in case of an error
+        SplashScreen.hideAsync();  // Ensure splash screen is hidden even in case of an error
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  if (isLoading) {
+    return null; // Keep splash screen visible while loading
+  }
+
+  // Render your navigation stack once loading is complete
+  return <NavigationStack initialRoute={initialRoute} />;
+};
+
+export default App;

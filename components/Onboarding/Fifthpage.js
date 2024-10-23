@@ -106,6 +106,8 @@
 // });
 
 // export default FifthPage;
+
+
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';  // Import AsyncStorage
@@ -117,17 +119,26 @@ const FifthPage = () => {
   const navigation = useNavigation(); // Initialize navigation
 
   // Function to handle when 'Finish' is pressed
+  // const handleFinish = async () => {
+  //   try {
+  //     // Save onboarding completion flag in AsyncStorage
+  //     await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+  //     // Navigate to the AuthStack (e.g., LogIn screen)
+  //     // navigation.navigate('AuthStack', { screen: 'LogIn' });
+  //     navigation.navigate('AuthStack');
+  //   } catch (error) {
+  //     console.error('Error completing onboarding:', error);
+  //   }
+  // };
   const handleFinish = async () => {
     try {
-      // Save onboarding completion flag in AsyncStorage
       await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-      // Navigate to the AuthStack (e.g., LogIn screen)
-      // navigation.navigate('AuthStack', { screen: 'LogIn' });
-      navigation.navigate('AuthStack');
+      navigation.replace('AuthStack'); // or 'AuthStack'
     } catch (error) {
       console.error('Error completing onboarding:', error);
     }
   };
+  
   
 
   return (
@@ -178,8 +189,9 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',  // Changed from 'center' to 'flex-start'
     alignItems: 'center',
+    marginTop: hp('15%'), 
   },
   image: {
     width: wp('90%'),
@@ -188,8 +200,8 @@ const styles = StyleSheet.create({
   },
   subheadingContainer: {
     alignItems: 'center',
-    marginVertical: hp('2%'),
-    marginBottom: hp('10%'),
+    // marginVertical: hp('2%'),
+    marginBottom: hp('20%'),
   },
   subheadingText: {
     fontSize: wp('6%'),

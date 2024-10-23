@@ -102,7 +102,7 @@ const ProductPage = ({ navigation, route }) => {
 
       const data = await response.json();
       if (data.status === 'true') {
-        // console.log(" dta", data);
+        // console.log(" dta--", data);
         setProducts(data.data); // Set the fetched products
       } else {
         setError('Failed to fetch products');

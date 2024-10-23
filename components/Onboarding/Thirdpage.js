@@ -60,8 +60,9 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',  // Changed from 'center' to 'flex-start'
     alignItems: 'center',
+    marginTop: hp('15%'), 
   },
   image: {
     width: wp('90%'),

@@ -190,13 +190,15 @@ const styles = StyleSheet.create({
   },
   headingText: {
     fontSize: wp('8%'),
+    marginBottom: hp('2%'),
     color: '#4C4DDC',
     fontWeight: 'bold',
   },
   imageContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',  // Changed from 'center' to 'flex-start'
     alignItems: 'center',
+    marginTop: hp('15%'),  // Added marginTop to move image down
   },
   image: {
     width: wp('90%'),

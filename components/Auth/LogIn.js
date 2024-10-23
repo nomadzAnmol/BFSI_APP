@@ -27,20 +27,76 @@ const LogIn = ({ navigation }) => {
   const hideDialog = () => setDialogVisible(false);
 
   // Handle login
+  // const handleLogin = async () => {
+  //   if (!phoneNumber || !password) {
+  //     showDialog('Validation Error', 'Please enter both phone number and password.');
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   const data = {
+  //     PhoneNumber: phoneNumber,
+  //     Password: password,
+  //   };
+
+  //   try {
+  //     const response = await fetch(`${API_URL}/login`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(data),
+  //     });
+
+  //     const result = await response.json();
+  //     console.log('respoinse -', result);
+  //     setLoading(false);
+
+  //     if (response.ok && result.status === 'true') {
+  //       // Save token in AsyncStorage
+  //       await AsyncStorage.setItem('userToken', result.token);
+
+  //       showDialog('Success', 'Login successful!');
+
+  //       setTimeout(() => {
+  //         hideDialog();
+  //        // navigation.navigate('BottomTabNavigator'); // Navigate to HomeScreen after successful login
+  //        navigation.navigate('BottomTabNavigator'); 
+  //       }, 1000);
+  //     } else {
+  //       showDialog('Error', result.message || 'Login failed. Please check your credentials.');
+  //       // Reset form fields on error
+  //       setPhoneNumber('');
+  //       setPassword('');
+  //     }
+  //   } catch (error) {
+  //     setLoading(false);
+  //     showDialog('Error', 'Failed to login. Please try again later.');
+  //     // Reset form fields on error
+  //     setPhoneNumber('');
+  //     setPassword('');
+  //   }
+  // };
+
   const handleLogin = async () => {
+    // Check if phone number and password are provided
     if (!phoneNumber || !password) {
       showDialog('Validation Error', 'Please enter both phone number and password.');
       return;
     }
-
+  
+    // Set loading state
     setLoading(true);
-
+  
+    // Prepare the data for the API request
     const data = {
       PhoneNumber: phoneNumber,
       Password: password,
     };
-
+  
     try {
+      // Make the API call
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
@@ -48,29 +104,33 @@ const LogIn = ({ navigation }) => {
         },
         body: JSON.stringify(data),
       });
-
+  
+      // Parse the response
       const result = await response.json();
-      console.log('respoinse -', result);
+      console.log('response -', result);
       setLoading(false);
-
+  
+      // Check if the response is successful and status is true
       if (response.ok && result.status === 'true') {
-        // Save token in AsyncStorage
+        // Save the token in AsyncStorage
         await AsyncStorage.setItem('userToken', result.token);
-
+  
         showDialog('Success', 'Login successful!');
-
+  
+        // Redirect to BottomTabNavigator after a delay
         setTimeout(() => {
           hideDialog();
-         // navigation.navigate('BottomTabNavigator'); // Navigate to HomeScreen after successful login
-         navigation.navigate('BottomTabNavigator'); 
+          navigation.replace('MainStack'); // Navigate to HomeScreen
         }, 1000);
       } else {
+        // Handle login failure
         showDialog('Error', result.message || 'Login failed. Please check your credentials.');
         // Reset form fields on error
         setPhoneNumber('');
         setPassword('');
       }
     } catch (error) {
+      // Handle any unexpected errors
       setLoading(false);
       showDialog('Error', 'Failed to login. Please try again later.');
       // Reset form fields on error
@@ -78,6 +138,7 @@ const LogIn = ({ navigation }) => {
       setPassword('');
     }
   };
+  
 
   // Navigation handlers
   const handleForgotNavigation = () => {

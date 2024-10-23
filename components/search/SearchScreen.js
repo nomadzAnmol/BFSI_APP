@@ -181,6 +181,7 @@ const styles = StyleSheet.create({
   suggestionsHeading: {
     fontSize: 16,
     marginTop: '2%',
+    marginBottom:'5%',
     fontWeight: 'bold',
   },
   suggestionButton: {
@@ -196,7 +197,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   suggestionText: {
-    fontSize: 14,
+    fontSize: 17,
+    fontWeight: 'bold',
     textAlign: 'center',
   },
   subCategoriesContainer: {
@@ -204,6 +206,7 @@ const styles = StyleSheet.create({
   },
   subCategoriesHeading: {
     fontSize: 16,
+    marginBottom:'5%',
     fontWeight: 'bold',
   },
   subCategoryButton: {
@@ -219,7 +222,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   subCategoryText: {
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: 'bold',
     textAlign: 'center',
   },
   noSubCategoryText: {

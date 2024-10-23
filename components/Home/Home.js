@@ -8,41 +8,51 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import TopBar from './TopBar';
 import { API_URL } from '@env';
+import { useKeepAwake } from 'expo-keep-awake';  // Import KeepAwake
+// Import images
+import Car from '../../assets/car.jpeg';
+import Business from '../../assets/business.jpeg';
+import Personal from '../../assets/personal-Loan.jpg';
+import life from '../../assets/life.jpeg';
+import health from '../../assets/health.jpeg';
+import travel from '../../assets/travel.jpeg';
+import loanL from '../../assets/loanl.png';
+import investmentl from '../../assets/investment.png';
+import bankP from '../../assets/bankP.png';
+import lifeinsurancei from '../../assets/insurance.png';
 
 
 const { width, height } = Dimensions.get('window');
-
 const wp = (percent) => width * (percent / 100);
 const hp = (percent) => height * (percent / 100);
 
 const Home = () => {
+  useKeepAwake();
   const [categories, setCategories] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeIndex2, setActiveIndex2] = useState(0);
   const navigation = useNavigation();
 
-  const fetchLoanCategories = async () => {
-    try {
-      const response = await fetch(`${API_URL}/HomePageCategory`);
-      const data = await response.json();
-      if (response.ok) {
-        setCategories(data.data);
-      }
-      else {
-        console.error("Failed to fetch..", data);
-      }
-    }
-    catch (error) {
-      console.error("Error Fetching Data", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchLoanCategories = async () => {
+      try {
+        const response = await fetch(`${API_URL}/HomePageCategory`);
+        const data = await response.json();
+        if (response.ok) {
+          setCategories(data.data);
+        } else {
+          console.error("Failed to fetch..", data);
+        }
+      } catch (error) {
+        console.error("Error Fetching Data", error);
+      }
+    };
     fetchLoanCategories();
   }, []);
 
@@ -57,7 +67,18 @@ const Home = () => {
     }
   };
 
-  
+  const handleImagePress = (index) => {
+    // Define redirects based on the image index
+    if (index === 0) {
+      Linking.openURL('https://www.kotak.com/en/personal-banking/loans/car-loan.html')
+    } else if (index === 1) {
+      Linking.openURL('https://www.kotak.com/en/business/loans/business-loan.html')  // Navigate to the Business Loan screen
+    } else if (index === 2) {
+      Linking.openURL('https://www.idfcfirstbank.com/')  // Navigate to the Personal Loan screen
+    }
+  };
+ 
+  const categoryImages = [loanL, lifeinsurancei,investmentl, bankP]; 
 
   return (
     <ScrollView style={styles.container}>
@@ -78,162 +99,129 @@ const Home = () => {
           style={styles.searchIcon}
         />
       </View>
-      <View>
-        <Text style={styles.heading}>
-          Future of Banking & Finance
-        </Text>
-      </View>
 
       {/* First Carousel */}
-      <View style={styles.carouselContainer}>
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onScroll={(e) => handleScroll(e, 1)}
-          scrollEventThrottle={16}
-        >
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Lorem Ipsum</Text>
-            <Text style={styles.cardSubHeading}>Card 1 Subheading</Text>
-          </View>
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Card 2 Heading</Text>
-            <Text style={styles.cardSubHeading}>Card 2 Subheading</Text>
-          </View>
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Card 3 Heading</Text>
-            <Text style={styles.cardSubHeading}>Card 3 Subheading</Text>
-          </View>
-        </ScrollView>
+      <View>
+    <Text style={styles.heading}>Apply Loan</Text>
+    <View style={styles.carouselContainer}>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={(e) => handleScroll(e, 1)}
+        scrollEventThrottle={16}
+      >
+        {[Car, Business, Personal].map((image, index) => (
+          <TouchableOpacity key={index} onPress={() => handleImagePress(index)}>
+            <View style={styles.carouselCard}>
+              <Image source={image} style={styles.carouselImage} />
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-        <View style={styles.dotsContainer}>
-          {[...Array(3).keys()].map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                { backgroundColor: activeIndex === index ? 'blue' : '#ccc' },
-              ]}
-            />
-          ))}
-        </View>
-      </View>
-
-   {/* Loan Categories */}
-   
-{/* <Text style={styles.heading}>Loan Categories</Text>
-<View style={styles.categoriesContainer}>
-  
-  {categories.map((category) => {
-    return (
-      <TouchableOpacity key={category.id} style={styles.categoryIconContainer}  >
-       
-        {category.Image && typeof category.Image === 'string' ? (
-          <Image
-            source={{ uri: category.Image }} 
-            style={styles.categoryImage}
+      <View style={styles.dotsContainer}>
+        {[...Array(3).keys()].map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              { backgroundColor: activeIndex === index ? '#4C4DDC' : '#ccc' },
+            ]}
           />
-        ) : (
-          <FontAwesome name="line-chart" size={32} color="Black" /> 
-        )}
-       
-        <Text style={styles.categoryText}>
-          {category.Title ? category.Title : 'No Title'}
-        </Text>
-      </TouchableOpacity>
-    );
-  })}
-</View> */}
-
-   {/* Loan Categories */}
-   <Text style={styles.heading}>Loan Categories</Text>
-      <View style={styles.categoriesContainer}>
-        {/* Map through categories and render them dynamically */}
-        {categories.map((category) => {
-          return (
-            <TouchableOpacity 
-              key={category.id} 
-              style={styles.categoryIconContainer} 
-              onPress={() => navigation.navigate('SubCategory', { SubCategoryId: category.id })} // Navigate to SubCategory and pass id
-            >
-              {/* Conditionally render image or icon */}
-              {category.Image && typeof category.Image === 'string' ? (
-                <Image
-                  source={{ uri: category.Image }} // Use the image if available
-                  style={styles.categoryImage}
-                />
-              ) : (
-                <FontAwesome name="line-chart" size={32} color="Black" /> // Render icon if image is not available
-              )}
-              {/* Ensure the title is a string and wrapped in a Text component */}
-              <Text style={styles.categoryText}>
-                {category.Title ? category.Title : 'No Title'} {/* Fallback if title is missing */}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        ))}
       </View>
+    </View>
+  </View>
+     
+          {/* Categories  */}
 
+      <Text style={styles.heading1}>Categories</Text>
+      {/* <View style={styles.categoriesContainer}>
+        {categories.map((category) => (
+          <TouchableOpacity 
+            key={category.id} 
+            style={styles.categoryIconContainer} 
+            onPress={() => navigation.navigate('SubCategory', { SubCategoryId: category.id })}
+          >
+            {category.Image && typeof category.Image === 'string' ? (
+              <Image
+                source={{ uri: category.Image }}
+                style={styles.categoryImage}
+              />
+            ) : (
+              <FontAwesome name="line-chart" size={32} color="Black" />
+            )}
+            <Text style={styles.categoryText}>
+              {category.Title ? category.Title : 'No Title'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View> */}
+      <View style={styles.categoriesContainer}>
+      {categories.map((category, index) => (
+        <TouchableOpacity 
+          key={category.id} 
+          style={styles.categoryIconContainer} 
+          onPress={() => navigation.navigate('SubCategory', { SubCategoryId: category.id })}
+        >
+          {categoryImages[index] ? (  // Use the new images
+            <Image
+              source={categoryImages[index]} // Render the corresponding image
+              style={styles.categoryImage}
+            />
+          ) : (
+            <FontAwesome name="line-chart" size={32} color="Black" />
+          )}
+          <Text style={styles.categoryText}>
+            {category.Title ? category.Title : 'No Title'}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
 
       {/* Second Carousel */}
-      <Text style={styles.heading}>Personal Finance Essentials</Text>
+      <Text style={styles.heading}>Personal Essentials like Insurance</Text>
+<View style={styles.carouselContainer}>
+  <ScrollView
+    horizontal
+    pagingEnabled
+    showsHorizontalScrollIndicator={false}
+    onScroll={(e) => handleScroll(e, 2)}
+    scrollEventThrottle={16}
+  >
+    {[
+      { heading: 'Travel Insurance', subheading: 'Low interest rates', image: travel, url: 'https://www.zurichkotak.com/travel-insurance' },
+      { heading: 'Term Life Insurance', subheading: 'Easy EMI options', image: life, url: 'https://lifeinsurance.adityabirlacapital.com/' },
+      { heading: 'Health Insurance', subheading: 'Quick approval', image: health, url: 'https://www.adityabirlacapital.com/healthinsurance/homepage' },
+    ].map((item, index) => (
+      <TouchableOpacity key={index} onPress={() => Linking.openURL(item.url)}>
+        <View style={styles.carouselCard}>
+          <Image source={item.image} style={styles.carouselImage} />
+          <Text style={styles.cardHeading}>{item.heading}</Text>
+          <Text style={styles.cardSubHeading}>{item.subheading}</Text>
+        </View>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+</View>
 
-      <View style={styles.carouselContainer}>
-        <ScrollView
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onScroll={(e) => handleScroll(e, 2)}
-          scrollEventThrottle={16}
-        >
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Personal Loan</Text>
-            <Text style={styles.cardSubHeading}>Low interest rates</Text>
-          </View>
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Home Loan</Text>
-            <Text style={styles.cardSubHeading}>Easy EMI options</Text>
-          </View>
-          <View style={styles.carouselCard}>
-            <Text style={styles.cardHeading}>Car Loan</Text>
-            <Text style={styles.cardSubHeading}>Quick approval</Text>
-          </View>
-        </ScrollView>
-      </View>
-      {/* <BottomTabNavigator/> */}
+
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  categoryImage: {
+  width: wp(16), // Adjust width as needed
+  height: hp(5), // Adjust height as needed
+  resizeMode: 'contain', // Adjust for better image fit
+},
   container: {
     flex: 1,
     paddingHorizontal: wp(2),
-    paddingTop: hp(10),
+    paddingTop: hp(8),
     backgroundColor: '#f5f5f5',
-  },
-  profileContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileButton: {
-    marginRight: wp(2),
-  },
-  profileImage: {
-    width: wp(8),
-    height: wp(8),
-    borderRadius: wp(50),
-  },
-  userName: {
-    fontSize: wp(3.5),
-    fontWeight: 'bold',
-  },
-  iconContainer: {
-    flexDirection: 'row',
-  },
-  iconButton: {
-    marginLeft: wp(2),
   },
   searchContainer: {
     flexDirection: 'row',
@@ -241,8 +229,6 @@ const styles = StyleSheet.create({
     marginBottom: hp(2),
     paddingHorizontal: wp(3),
     borderRadius: wp(2),
-    borderWidth: 1,
-    borderColor: '#ccc',
     backgroundColor: '#fff',
   },
   searchInput: {
@@ -254,32 +240,29 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     height: hp(20),
-    marginBottom: hp(3),
+    marginTop: hp(1),
+    marginBottom: hp(1),
   },
   carouselCard: {
     width: wp(80),
-    marginRight: wp(2),
     height: '100%',
+    marginRight: wp(2),
+    borderRadius: wp(2),
+    marginBottom: hp(5),
+    overflow: 'hidden', // Ensures image edges are rounded
+    // backgroundColor: '#4C4DDC', // Background color for second carousel
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#4C4DDC',
-    borderRadius: wp(2),
-    padding: wp(4),
   },
-  cardHeading: {
-    fontSize: wp(4),
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  cardSubHeading: {
-    fontSize: wp(3),
-    color: '#fff',
+  carouselImage: {
+    width: '100%',
+    height: '100%',
   },
   dotsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: hp(1),
-
   },
   dot: {
     width: wp(2),
@@ -288,6 +271,12 @@ const styles = StyleSheet.create({
     marginHorizontal: wp(0.5),
   },
   heading: {
+    fontSize: wp(5),
+    fontWeight: 'bold',
+    marginBottom: hp(1),
+    marginLeft: wp(2),
+  },
+  heading1: {
     fontSize: wp(5),
     fontWeight: 'bold',
     marginBottom: hp(2),
@@ -304,14 +293,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: hp(2),
   },
-  categoryIcon: {
-    backgroundColor: '#4C4DDC',
-    borderRadius: wp(10),
-    padding: wp(3),
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: hp(1),
-  },
   categoryText: {
     fontSize: wp(3),
     fontWeight: 'bold',
@@ -319,3 +300,4 @@ const styles = StyleSheet.create({
 });
 
 export default Home;
+
